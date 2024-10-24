@@ -34,6 +34,7 @@ public class MultithreadedProxyServer {
 
         public ClientHandler(Socket clientSocket) {
             this.clientSocket = clientSocket;
+            System.out.println("Accepted connection from client: " + clientSocket.getInetAddress());
         }
 
         @Override
