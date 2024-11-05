@@ -1,4 +1,3 @@
-Mini project- 5th semester
 
 1. compile and run either(non-threaded or multi-threaded) java file on terminal (server terminal)
    
