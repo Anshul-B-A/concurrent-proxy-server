@@ -1,4 +1,4 @@
-
+# How to run
 1. compile and run either(non-threaded or multi-threaded) java file on terminal (server terminal)
    
 2. On a new terminal(client) run:
