@@ -7,7 +7,7 @@ public class MultithreadedProxyServer {
     
     private static final int PORT = 8888;  // Proxy server port
     private static final int THREAD_POOL_SIZE = 10;  // Number of threads
-    private static final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();  // Cache to store responses
+    private static final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>(100);  // Cache to store responses
 
     public static void main(String[] args) {
         ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
