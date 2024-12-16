@@ -2,15 +2,17 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
 
-// Proxy server class
+// MINI PROJECT 5TH SEM - 1RF22CS019, 1RF22CS025, 1RF22CS035, 1RF22CS035 - AY=2024-2025
+// proxy server driver class
 public class MultithreadedProxyServer {
     
-    private static final int PORT = 8888;  // Proxy server port
-    private static final int THREAD_POOL_SIZE = 10;  // Number of threads
-    private static final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>(100);  // Cache to store responses
+    private static final int PORT = 8888;  // Proxy server port no - used in comp
+    private static final int THREAD_POOL_SIZE = 10;  // Number of threads in ready pool 
+    private static final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>(100);  // improv - conc hashmap cache to store responses
+    // key ---> value = http req ---> response
 
     public static void main(String[] args) {
-        ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);  // util , helps maintain task queue for pool
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Proxy server running on port " + PORT + "...");
@@ -18,8 +20,8 @@ public class MultithreadedProxyServer {
             while (true) {
                 // Accept client connection
                 Socket clientSocket = serverSocket.accept();
-                // Submit client handling to the thread pool
-                threadPool.submit(new ClientHandler(clientSocket));
+                // Submit client handling to the thread pool - add to queue
+                threadPool.submit(new ClientHandler(clientSocket)); // client handler-- custom class see below
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -28,13 +30,13 @@ public class MultithreadedProxyServer {
         }
     }
 
-    // Client handler class (Runnable for multithreading)
+    // improv - Client handler class (Runnable for multithreading) - interface better than class 
     static class ClientHandler implements Runnable {
-        private Socket clientSocket;
+        private Socket clientSocket; 
 
-        public ClientHandler(Socket clientSocket) {
+        public ClientHandler(Socket clientSocket) { // construictor - confirm  
             this.clientSocket = clientSocket;
-            System.out.println("Accepted connection from client: " + clientSocket.getInetAddress());
+            System.out.println("Accepted connection from client: " + clientSocket.getInetAddress()); 
         }
 
         @Override
@@ -56,7 +58,8 @@ public void run() {
         String cachedResponse = cache.get(url);
         if (cachedResponse != null) {
             System.out.println("Cache hit for: " + url);
-            // Send cached response with proper HTTP/1.1 headers
+
+            // major improv --- Send cached response with proper HTTP/1.1 headers
             outToClient.println("HTTP/1.1 200 OK");
             outToClient.println("Content-Type: text/html");
             outToClient.println("Content-Length: " + cachedResponse.length());
@@ -91,23 +94,23 @@ public void run() {
 }
 
 
-        // Extract URL from the GET request line
+        // improv - Extract URL from the GET request line
         private String extractURL(String requestLine) {
             String[] parts = requestLine.split(" ");
             return parts[1];  // Return the requested URL
         }
 
-        // Forward the client request to the target server
+        // Forward the client request to the target server 
         private String forwardRequestToServer(String url) {
             try {
-                // Create a connection to the target server
-                URI uri = URI.create(url);  // Create URI from string
+                // Create a connection to the target server - uri coz of HTTP 1.1
+                URI uri = URI.create(url);  // Create URI from string --- uri- uniform resource identifier ; url specify location of resource 
                 URL targetUrl = uri.toURL();  // Convert URI to URL
 
                 HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
                 connection.setRequestMethod("GET");
 
-                // Get response from the server
+                // Get response from the server 
                 BufferedReader inFromServer = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder response = new StringBuilder();
                 String inputLine;
