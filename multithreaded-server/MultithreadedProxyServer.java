@@ -3,8 +3,8 @@ import java.net.*;
 import java.util.concurrent.*;
 
 // MINI PROJECT 5TH SEM - 1RF22CS019, 1RF22CS025, 1RF22CS035, 1RF22CS035 - AY=2024-2025
-// multithreaded proxy server driver class
-// 1 methods - main
+// multithreaded proxy server driver class with nested class 
+// 1 method - main
 // METHOD 1: MAIN
 // start server and handle clients concurrently 
 public class MultithreadedProxyServer {
@@ -41,12 +41,16 @@ public class MultithreadedProxyServer {
     static class ClientHandler implements Runnable {
         private Socket clientSocket; 
 
-        // METHOD 1: 
+        // METHOD 1: CONSTRUCTOR
+        // intialize client socket 
         public ClientHandler(Socket clientSocket) { // constructor - confirm  
             this.clientSocket = clientSocket;
             System.out.println("Accepted connection from client: " + clientSocket.getInetAddress()); 
         }
 
+        // METHOD 2: RUN (overrides orignal run frm interface)
+        // manage caching for each thread & forward requests to external server
+        // io exception is available
         @Override
 public void run() {
     try (BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -56,8 +60,8 @@ public void run() {
         String requestLine = inFromClient.readLine();
         System.out.println("Received request: " + requestLine);
 
-        if (requestLine == null || !requestLine.startsWith("GET")) {
-            return;  // Handle only GET requests
+        if (requestLine == null || !requestLine.startsWith("GET")) {        // only GET http requests
+            return;  
         }
 
         String url = extractURL(requestLine);
@@ -67,7 +71,7 @@ public void run() {
         if (cachedResponse != null) {
             System.out.println("Cache hit for: " + url);
 
-            // major improv --- Send cached response with proper HTTP/1.1 headers
+            // improv --- Send cached response with proper HTTP/1.1 headers
             outToClient.println("HTTP/1.1 200 OK");
             outToClient.println("Content-Type: text/html");
             outToClient.println("Content-Length: " + cachedResponse.length());
@@ -84,8 +88,8 @@ public void run() {
                 outToClient.println();  // Empty line between headers and body
                 outToClient.println(serverResponse);  // Send response to client
                 // Cache the response
-                synchronized (cache) {
-                    cache.put(url, serverResponse);
+                synchronized (cache) {      //thread safe
+                    cache.put(url, serverResponse); //put(key, value)
                 }
             }
         }
@@ -102,13 +106,17 @@ public void run() {
 }
 
 
-        // improv - Extract URL from the GET request line
+        // METHOD 3: EXTRACT URL
+        // parts[0] = GET ---- parts[1] = <URL> ----- parts[2] = HTTP/1.1
+        // RETURNS URL (string)
         private String extractURL(String requestLine) {
             String[] parts = requestLine.split(" ");
             return parts[1];  // Return the requested URL
         }
 
+        // METHOD 4: FORWARD REQUEST TO SERVER
         // Forward the client request to the target server 
+        // RETURNS server response (string)
         private String forwardRequestToServer(String url) {
             try {
                 // Create a connection to the target server - uri coz of HTTP 1.1
