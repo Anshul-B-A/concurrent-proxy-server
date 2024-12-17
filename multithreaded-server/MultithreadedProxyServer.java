@@ -3,13 +3,16 @@ import java.net.*;
 import java.util.concurrent.*;
 
 // MINI PROJECT 5TH SEM - 1RF22CS019, 1RF22CS025, 1RF22CS035, 1RF22CS035 - AY=2024-2025
-// proxy server driver class
+// multithreaded proxy server driver class
+// 1 methods - main
+// METHOD 1: MAIN
+// start server and handle clients concurrently 
 public class MultithreadedProxyServer {
     
-    private static final int PORT = 8888;  // Proxy server port no - used in comp
+    private static final int PORT = 8888;  // Proxy server running on which port no 
     private static final int THREAD_POOL_SIZE = 10;  // Number of threads in ready pool 
     private static final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>(100);  // improv - conc hashmap cache to store responses
-    // key ---> value = http req ---> response
+    // key = http req ---> value = response
 
     public static void main(String[] args) {
         ExecutorService threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);  // util , helps maintain task queue for pool
@@ -24,17 +27,22 @@ public class MultithreadedProxyServer {
                 threadPool.submit(new ClientHandler(clientSocket)); // client handler-- custom class see below
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace();        // for socket issues
         } finally {
-            threadPool.shutdown();
+            threadPool.shutdown();         
         }
     }
 
+
+    // NESTED CLASS - CLIENT HANDLER 
+    // implements runnable interface
+    // 4 methods - client handler, run, extract url, forward request to server
     // improv - Client handler class (Runnable for multithreading) - interface better than class 
     static class ClientHandler implements Runnable {
         private Socket clientSocket; 
 
-        public ClientHandler(Socket clientSocket) { // construictor - confirm  
+        // METHOD 1: 
+        public ClientHandler(Socket clientSocket) { // constructor - confirm  
             this.clientSocket = clientSocket;
             System.out.println("Accepted connection from client: " + clientSocket.getInetAddress()); 
         }
